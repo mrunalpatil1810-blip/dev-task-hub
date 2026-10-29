@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevTask Hub</title>
+  <style>
+    :root { --bg:#f5f3ff; --ink:#211b3a; --purple:#6d4aff; --pink:#ff6fae; --card:#fff; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Arial, sans-serif; color:var(--ink); background:linear-gradient(135deg,#f5f3ff,#fff0f7); min-height:100vh; }
+    header { padding:28px 7%; color:white; background:linear-gradient(110deg,#6246ea,#a855f7,#f472b6); }
+    header h1 { margin:0 0 8px; font-size:clamp(28px,4vw,42px); }
+    header p { margin:0; opacity:.95; }
+    main { max-width:1000px; margin:34px auto; padding:0 20px; }
+    .panel { background:var(--card); border-radius:22px; padding:24px; box-shadow:0 14px 40px #38256d18; }
+    .top { display:flex; flex-wrap:wrap; gap:18px; align-items:center; justify-content:space-between; }
+    .top h2 { margin:0 0 6px; }
+    .muted { color:#706a86; }
+    form { display:flex; flex-wrap:wrap; gap:10px; margin:22px 0; }
+    input { flex:1; min-width:200px; border:1px solid #ded8f5; border-radius:12px; padding:13px 14px; font-size:15px; }
+    button { border:0; border-radius:12px; padding:13px 18px; color:white; font-weight:700; background:linear-gradient(110deg,var(--purple),var(--pink)); cursor:pointer; transition:transform .2s, box-shadow .2s; }
+    button:hover { transform:translateY(-2px); box-shadow:0 8px 18px #6d4aff35; }
+    ul { list-style:none; padding:0; margin:0; display:grid; gap:10px; }
+    li { display:flex; align-items:center; gap:12px; padding:14px; border:1px solid #eee9ff; border-radius:14px; animation:fade .25s ease-out; }
+    li span { flex:1; overflow-wrap:anywhere; }
+    li.done span { color:#9992aa; text-decoration:line-through; }
+    .check { width:18px; height:18px; accent-color:var(--purple); }
+    .delete { padding:8px 11px; background:#fff0f5; color:#b4235b; }
+    .empty { padding:22px; text-align:center; color:#827b98; background:#faf9ff; border-radius:14px; }
+    footer { text-align:center; padding:25px; color:#807991; font-size:13px; }
+    @keyframes fade { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>✦ DevTask Hub</h1>
+    <p>A simple, colorful task board for your next big idea.</p>
+  </header>
+  <main>
+    <section class="panel">
+      <div class="top">
+        <div><h2>My tasks</h2><div class="muted">Add a task, mark it complete, or remove it.</div></div>
+        <strong id="task-count">0 tasks</strong>
+      </div>
+      <form id="task-form">
+        <input id="task-input" type="text" placeholder="e.g. Build the app dashboard..." aria-label="New task" maxlength="120">
+        <button type="submit">＋ Add task</button>
+      </form>
+      <ul id="task-list" aria-live="polite"></ul>
+      <div id="empty-state" class="empty">No tasks yet — add your first task above ✨</div>
+    </section>
+  </main>
+  <footer>DevTask Hub · Git workflow practice project</footer>
+  <script>
+    const form = document.querySelector("#task-form");
+    const input = document.querySelector("#task-input");
+    const list = document.querySelector("#task-list");
+    const empty = document.querySelector("#empty-state");
+    const count = document.querySelector("#task-count");
+    let tasks = [];
+
+    function renderTasks() {
+      list.replaceChildren();
+      tasks.forEach((task, index) => {
+        const item = document.createElement("li");
+        if (task.done) item.classList.add("done");
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "check";
+        checkbox.checked = task.done;
+        checkbox.setAttribute("aria-label", "Mark task complete");
+        checkbox.addEventListener("change", () => { tasks[index].done = checkbox.checked; renderTasks(); });
+        const label = document.createElement("span");
+        label.textContent = task.title;
+        const remove = document.createElement("button");
+        remove.className = "delete";
+        remove.textContent = "Delete";
+        remove.addEventListener("click", () => { tasks.splice(index, 1); renderTasks(); });
+        item.append(checkbox, label, remove);
+        list.append(item);
+      });
+      empty.hidden = tasks.length > 0;
+      count.textContent = `${tasks.length} task${tasks.length === 1 ? "" : "s"}`;
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const title = input.value.trim();
+      if (!title) { input.focus(); return; }
+      tasks.push({ title, done: false });
+      input.value = "";
+      renderTasks();
+      input.focus();
+    });
+    renderTasks();
+  </script>
+</body>
+</html>

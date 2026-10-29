@@ -1,0 +1,21 @@
+stages:
+  - build
+  - test
+
+build_job:
+  stage: build
+  image: alpine:3.20
+  script:
+    - mkdir -p dist
+    - cp index.html dist/
+    - echo "Build completed successfully."
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
+
+test_job:
+  stage: test
+  image: node:18-alpine
+  script:
+    - node test.js
